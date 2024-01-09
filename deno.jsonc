@@ -2,17 +2,20 @@
   "tasks": {
     "dev": "deno run --watch main.ts",
     "test": "deno test --allow-write=. --allow-read=.",
-    "hook": "deno run --allow-read=. --allow-write=. https://deno.land/x/deno_hooks@0.1.1/mod.ts"
+    "hook": "deno run --allow-run=git --allow-read --allow-write https://deno.land/x/deno_hooks@0.1.1/mod.ts"
   },
+  "imports": {
+    "482f-utils/": "https://raw.githubusercontent.com/482F/482f-deno-utils/master/",
+    "cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.3/"
+  },
+  "lock": false,
   "compilerOptions": {
     "strict": true,
     "noUncheckedIndexedAccess": true
   },
   "lint": {
     "rules": {
-      "tags": [
-        "recommended"
-      ],
+      "tags": ["recommended"],
       "include": [],
       "exclude": []
     }
