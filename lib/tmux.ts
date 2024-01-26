@@ -1,5 +1,9 @@
 import $ from 'dax/mod.ts'
 
+function escapeSessionName(sessionName: string) {
+  return sessionName.replaceAll(/[\.:]/g, '-')
+}
+
 export const tmux = {
   async newWindow(
     sessionName: string,
@@ -7,9 +11,10 @@ export const tmux = {
     command: string,
     { preventStop = false } = {},
   ) {
+    const escapedSessionName = escapeSessionName(sessionName)
     const [isSessionExists, isWindowExists] = await Promise.all([
-      tmux.getSessionNames().then((ns) => ns.includes(sessionName)),
-      tmux.getWindowNames(sessionName).then((ns) => ns.includes(windowName)),
+      tmux.getSessionNames().then((ns) => ns.includes(escapedSessionName)),
+      tmux.getWindowNames(escapedSessionName).then((ns) => ns.includes(windowName)),
     ])
 
     if (isSessionExists && isWindowExists) {
@@ -32,8 +37,8 @@ export const tmux = {
       .join(';')
 
     const tmuxCommand = isSessionExists
-      ? `new-window -t ${$.escapeArg(sessionName)}`
-      : `new-session -s ${$.escapeArg(sessionName)}`
+      ? `new-window -t ${$.escapeArg(escapedSessionName)}`
+      : `new-session -s ${$.escapeArg(escapedSessionName)}`
 
     $.raw`tmux -2 ${tmuxCommand} -n ${$.escapeArg(windowName)} -d ${
       $.escapeArg(innerCommand)
@@ -43,15 +48,17 @@ export const tmux = {
     return {
       readableStream: await pipePromise.then((pipe) => pipe.readable),
       async sendKeys(keys: string) {
-        await $`tmux send-keys -t ${sessionName}:${windowName} ${keys}`
+        await $`tmux send-keys -t ${escapedSessionName}:${windowName} ${keys}`
       },
     }
   },
   async attach(sessionName: string) {
-    await $`tmux a -t ${sessionName}`.env({ TMUX: '' })
+    const escapedSessionName = escapeSessionName(sessionName)
+    await $`tmux a -t ${escapedSessionName}`.env({ TMUX: '' })
   },
   async stop(sessionName: string, windowName: string) {
-    await $`tmux kill-session -t ${sessionName}:${windowName}`
+    const escapedSessionName = escapeSessionName(sessionName)
+    await $`tmux kill-session -t ${escapedSessionName}:${windowName}`
   },
   async getSessionNames(): Promise<string[]> {
     return await $`tmux list-sessions -F#S`
@@ -59,7 +66,8 @@ export const tmux = {
       .then((r) => r.split('\n'))
   },
   async getWindowNames(sessionName: string): Promise<string[]> {
-    const result = await $`tmux list-windows -t ${sessionName} -F#S`
+    const escapedSessionName = escapeSessionName(sessionName)
+    const result = await $`tmux list-windows -t ${escapedSessionName} -F#S`
       .quiet()
       .noThrow()
     if (result.code !== 0) {
