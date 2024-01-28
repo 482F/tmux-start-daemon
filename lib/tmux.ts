@@ -1,4 +1,4 @@
-import $ from 'https://deno.land/x/dax/mod.ts'
+import $ from 'dax/mod.ts'
 
 export const tmux = {
   async newWindow(

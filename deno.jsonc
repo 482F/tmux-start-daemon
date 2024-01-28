@@ -6,7 +6,8 @@
   },
   "imports": {
     "482f-utils/": "https://raw.githubusercontent.com/482F/482f-deno-utils/master/",
-    "cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.3/"
+    "cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.3/",
+    "dax/": "https://deno.land/x/dax@0.37.1/"
   },
   "lock": false,
   "compilerOptions": {
