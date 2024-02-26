@@ -14,7 +14,9 @@ export const tmux = {
     const escapedSessionName = escapeSessionName(sessionName)
     const [isSessionExists, isWindowExists] = await Promise.all([
       tmux.getSessionNames().then((ns) => ns.includes(escapedSessionName)),
-      tmux.getWindowNames(escapedSessionName).then((ns) => ns.includes(windowName)),
+      tmux.getWindowNames(escapedSessionName).then((ns) =>
+        ns.includes(windowName)
+      ),
     ])
 
     if (isSessionExists && isWindowExists) {
