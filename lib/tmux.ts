@@ -61,9 +61,14 @@ export const tmux = {
     await $`tmux kill-session -t ${escapedSessionName}:${windowName}`
   },
   async getSessionNames(): Promise<string[]> {
-    return await $`tmux list-sessions -F#S`
-      .text()
-      .then((r) => r.split('\n'))
+    const result = await $`tmux list-sessions -F#S`
+      .quiet()
+      .noThrow()
+    if (result.code !== 0) {
+      return []
+    } else {
+      return result.stdout.split('\n')
+    }
   },
   async getWindowNames(sessionName: string): Promise<string[]> {
     const escapedSessionName = escapeSessionName(sessionName)
