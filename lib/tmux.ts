@@ -26,14 +26,13 @@ export const tmux = {
     const namedPipePath = await Deno.makeTempFile()
     await Deno.remove(namedPipePath).catch(() => {})
     await $`mkfifo ${namedPipePath}`
-    const pipePromise = Deno.open(namedPipePath)
 
     const preventStopCommand = 'read -p "press Enter..."'
     const innerCommand = [
       `tmux pipe-pane -O -t "\$TMUX_PANE" "cat > ${namedPipePath}"`,
       command,
-      `rm ${namedPipePath}`,
       preventStop ? `${preventStopCommand}` : undefined,
+      `rm ${namedPipePath}`,
     ]
       .filter(Boolean)
       .join(';')
@@ -42,10 +41,11 @@ export const tmux = {
       ? `new-window -t ${$.escapeArg(escapedSessionName)}`
       : `new-session -s ${$.escapeArg(escapedSessionName)}`
 
-    $.raw`tmux -2 ${tmuxCommand} -n ${$.escapeArg(windowName)} -d ${
+    await $.raw`tmux -2 ${tmuxCommand} -n ${$.escapeArg(windowName)} -d ${
       $.escapeArg(innerCommand)
     }`
-      .spawn()
+
+    const pipePromise = Deno.open(namedPipePath)
 
     return {
       readableStream: await pipePromise.then((pipe) => pipe.readable),
